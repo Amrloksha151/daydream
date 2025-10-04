@@ -16,7 +16,22 @@
             }
         }
     </script>
-    <audio id="bg-music" src="background music.mp3" loop autoplay></audio>
+
+    <audio id="bg-music" src="background music.mp3" loop></audio>
+    <script>
+        // Play background music after user interaction
+        window.addEventListener('click', function playMusicOnce() {
+            const audio = document.getElementById('bg-music');
+            if (audio && audio.paused) {
+                audio.load();
+                audio.play().catch((e) => {
+                    // Optionally, show a message or handle the error
+                    console.warn('Audio playback failed:', e);
+                });
+            }
+            window.removeEventListener('click', playMusicOnce);
+        });
+    </script>
     <script type="module">
         import * as THREE from 'three';
         import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
@@ -71,6 +86,12 @@
 
         // Helper to spawn a new onion at a random x position
         function spawnOnion() {
+            const assets = [
+                '/Assets/onion.glb',
+                '/Assets/canned_tomato-soup.glb',
+                '/Assets/trash_bag.glb'
+            ];
+            const randomAsset = assets[Math.floor(Math.random() * assets.length)];
             gltfLoader.load('/Assets/onion.glb', function (gltf) {
                 const onion = gltf.scene;
                 onion.position.z = -5;
