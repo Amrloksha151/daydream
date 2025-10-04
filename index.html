@@ -3,34 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Koshary</title>
+    <title>Run For Koshary</title>
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
     <canvas id="bg"></canvas>
     <script type="module">
         import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.180.0/three.module.min.js";
-        import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-        import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
-
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#bg') });
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1;
-        renderer.outputColorSpace = THREE.sRGBEncoding;
-
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-
-        const rgbeLoader = new RGBELoader();
         
-        camera.position.setZ(5);
-        camera.position.setY(2);
-
-        renderer.render(scene, camera);
     </script>
 </body>
 </html>
