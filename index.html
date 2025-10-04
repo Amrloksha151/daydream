@@ -19,15 +19,41 @@
     <script type="module">
         import * as THREE from 'three';
         import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg') });
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        // document.body.appendChild(renderer.domElement); // Already using the canvas with id 'bg'
         camera.position.setZ(5);
         camera.position.setY(1);
-        renderer.render(scene, camera);
+        const loader = new FBXLoader();
+        loader.load('/character/Ch42_nonPBR.fbx', function (object) {
+            // Traverse the loaded object to find meshes
+            object.traverse(function (child) {
+            if (child.isMesh) {
+                // Create a new geometry and material from the loaded mesh
+                const geometry = child.geometry.clone();
+                const material = child.material.clone();
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.set(0, 0, 0);
+                mesh.scale.set(0.01, 0.01, 0.01);
+                scene.add(mesh);
+            }
+            });
+        }, undefined, function (error) {
+            console.error(error);
+        });
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
     </script>
 </body>
 </html>
