@@ -8,9 +8,17 @@
 </head>
 <body>
     <canvas id="bg"></canvas>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.152.2/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.152.2/examples/jsm/"
+            }
+        }
+    </script>
     <script type="module">
-        import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.180.0/three.module.min.js";
-
+        import * as THREE from 'three';
+        import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg') });
@@ -19,7 +27,6 @@
         document.body.appendChild(renderer.domElement);
         camera.position.setZ(5);
         camera.position.setY(1);
-        camera.rotation.setX(-2);
         renderer.render(scene, camera);
     </script>
 </body>
