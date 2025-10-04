@@ -29,29 +29,31 @@
         camera.position.setZ(5);
         camera.position.setY(2);
         const loader = new FBXLoader();
-        loader.load('/character/Ch42_nonPBR.fbx', function (object) {
-            // Traverse the loaded object to find meshes
-            object.traverse(function (child) {
-            if (child.isMesh) {
-                // Create a new geometry and material from the loaded mesh
-                const geometry = child.geometry.clone();
-                const material = child.material.clone();
-                const mesh = new THREE.Mesh(geometry, material);
-                mesh.position.set(0, 0, 0);
-                mesh.scale.set(0.02, 0.02, 0.02);
-                scene.add(mesh);
-            }
+        let mixer;
+
+        // First load the character, then load the animation and apply it to the character's skeleton
+        loader.load('/character/Ch42_nonPBR.fbx', function (character) {
+            character.scale.set(0.02, 0.02, 0.02);
+            character.position.set(0, 0, 0);
+            scene.add(character);
+
+            loader.load('/character/Running (1).fbx', function (anim) {
+                mixer = new THREE.AnimationMixer(character);
+                if (anim.animations && anim.animations.length > 0) {
+                    const action = mixer.clipAction(anim.animations[0]);
+                    action.play();
+                }
             });
-        }, undefined, function (error) {
-            console.error(error);
         });
         const light = new THREE.DirectionalLight(0xffffff, 1);
         light.position.set(5, 5, 5);
         scene.add(light);
 
-        
+        // Update the mixer in the animation loop
+        const prevAnimate = animate;
         function animate() {
             requestAnimationFrame(animate);
+            if (mixer) mixer.update(0.016);
             renderer.render(scene, camera);
         }
         animate();
