@@ -27,15 +27,20 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         // document.body.appendChild(renderer.domElement); // Already using the canvas with id 'bg'
         camera.position.setZ(5);
-        camera.position.setY(2);
+        camera.position.setY(3);
+        camera.rotation.x = -0.3;
         const loader = new FBXLoader();
         let mixer;
 
-        // First load the character, then load the animation and apply it to the character's skeleton
+        let characterRef = null;
+
+        // Store reference to character when loaded
         loader.load('/character/Ch42_nonPBR.fbx', function (character) {
             character.scale.set(0.02, 0.02, 0.02);
             character.position.set(0, 0, 0);
+            character.rotation.y = Math.PI;
             scene.add(character);
+            characterRef = character;
 
             loader.load('/character/Running (1).fbx', function (anim) {
                 mixer = new THREE.AnimationMixer(character);
@@ -49,10 +54,118 @@
         light.position.set(5, 5, 5);
         scene.add(light);
 
-        // Update the mixer in the animation loop
-        const prevAnimate = animate;
+        // Listen for keydown events to move character left/right
+        window.addEventListener('keydown', (event) => {
+            if (!characterRef) return;
+            if (event.key === 'a' || event.key === 'A') {
+                characterRef.position.x -= 0.1;
+            } else if (event.key === 'd' || event.key === 'D') {
+                characterRef.position.x += 0.1;
+            }
+        });
+
+        const gltfLoader = new GLTFLoader();
+        gltfLoader.load('/Assets/road__avenue__street.glb', function (gltf) {
+            gltf.scene.position.set(0, 0, 0);
+            gltf.scene.scale.set(0.05, 0.05, 0.05);
+            scene.add(gltf.scene);
+        });
+
+        gltfLoader.load('/Assets/onion.glb', function (gltf) {
+            gltf.scene.position.z = -5;
+            gltf.scene.position.y = 0.5;
+            gltf.scene.position.x = 2;
+            gltf.scene.scale.set(0.1, 0.1, 0.1);
+            scene.add(gltf.scene);
+        });
+        const movingObjects = [];
+
+        // Helper to spawn a new onion at a random x position
+        function spawnOnion() {
+            gltfLoader.load('/Assets/onion.glb', function (gltf) {
+                const onion = gltf.scene;
+                onion.position.z = -5;
+                onion.position.y = 0.5;
+                onion.position.x = (Math.random() - 0.5) * 4; // random x between -2 and 2
+                onion.scale.set(0.1, 0.1, 0.1);
+                scene.add(onion);
+                movingObjects.push(onion);
+            });
+        }
+
+        // Initial onions
+        for (let i = 0; i < 3; i++) {
+            spawnOnion();
+        }
+
+        // Move objects backward and respawn when out of view
+        const originalAnimate = animate;
+        animate = function () {
+            requestAnimationFrame(animate);
+
+            // Move onions backward (toward camera)
+            for (let i = movingObjects.length - 1; i >= 0; i--) {
+                const obj = movingObjects[i];
+                obj.position.z += 0.07; // move toward camera
+
+                // If object is behind camera, remove and respawn
+                if (obj.position.z > camera.position.z + 1) {
+                    scene.remove(obj);
+                    movingObjects.splice(i, 1);
+                    spawnOnion();
+                }
+            }
+
+            if (mixer) mixer.update(0.016);
+            renderer.render(scene, camera);
+        };
+
+        let roadRef = null;
+        const roadLength = 40; // Adjust based on your road model's length in Z
+
+        // Load two road segments for looping
+        gltfLoader.load('/Assets/road__avenue__street.glb', function (gltf) {
+            const road1 = gltf.scene;
+            road1.position.set(0, 0, 0);
+            road1.scale.set(0.05, 0.05, 0.05);
+            scene.add(road1);
+
+            // Clone for second segment
+            const road2 = road1.clone();
+            road2.position.z = -roadLength;
+            scene.add(road2);
+
+            roadRef = [road1, road2];
+        });
+
+        // Move road segments backward and loop them
         function animate() {
             requestAnimationFrame(animate);
+
+            // Move and loop road segments
+            if (roadRef) {
+                for (let i = 0; i < roadRef.length; i++) {
+                    roadRef[i].position.z += 0.07;
+                    // If road is behind camera, move it to the back
+                    if (roadRef[i].position.z > camera.position.z + roadLength / 2) {
+                        // Find the other segment
+                        const other = roadRef[(i + 1) % 2];
+                        roadRef[i].position.z = other.position.z - roadLength;
+                    }
+                }
+            }
+
+            // Move onions backward (toward camera)
+            for (let i = movingObjects.length - 1; i >= 0; i--) {
+                const obj = movingObjects[i];
+                obj.position.z += 0.07;
+                if (obj.position.z > camera.position.z + 1) {
+                    scene.remove(obj);
+                    movingObjects.splice(i, 1);
+                    spawnOnion();
+                }
+            }
+
             if (mixer) mixer.update(0.016);
             renderer.render(scene, camera);
         }
