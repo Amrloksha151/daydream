@@ -88,16 +88,23 @@
         function spawnOnion() {
             const assets = [
                 '/Assets/onion.glb',
-                '/Assets/canned_tomato-soup.glb',
-                '/Assets/trash_bag.glb'
+                '/Assets/canned_tomato_soup.glb',
+                '/Assets/trash_bag.glb',
+                '/Assets/single_cooked_macaroni (1).glb'
             ];
             const randomAsset = assets[Math.floor(Math.random() * assets.length)];
-            gltfLoader.load('/Assets/onion.glb', function (gltf) {
+            gltfLoader.load(randomAsset, function (gltf) {
                 const onion = gltf.scene;
                 onion.position.z = -5;
                 onion.position.y = 0.5;
-                onion.position.x = (Math.random() - 0.5) * 4; // random x between -2 and 2
-                onion.scale.set(0.1, 0.1, 0.1);
+                onion.position.x = (Math.random() - 0.5) * 16; // random x between -2 and 2
+                if (randomAsset === '/Assets/trash_bag.glb') {
+                    onion.scale.set(0.02, 0.02, 0.02);
+                } else if (randomAsset === '/Assets/canned_tomato_soup.glb') {
+                    onion.scale.set(0.5, 0.5, 0.5);
+                } else {
+                    onion.scale.set(0.1, 0.1, 0.1);
+                }
                 scene.add(onion);
                 movingObjects.push(onion);
             });
@@ -191,7 +198,12 @@
             renderer.render(scene, camera);
         }
         animate();
-
+        // Update camera position to follow the character each frame
+        function animateWithCamera() {
+            updateCamera();
+            requestAnimationFrame(animateWithCamera);
+        }
+        animateWithCamera();
         // Alert after 30 seconds
         setTimeout(() => {
             alert("You won koshary 🥘");
