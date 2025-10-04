@@ -66,14 +66,6 @@
 
         const gltfLoader = new GLTFLoader();
         // Remove the initial road load here to prevent overlap.
-
-        gltfLoader.load('/Assets/onion.glb', function (gltf) {
-            gltf.scene.position.z = -5;
-            gltf.scene.position.y = 0.5;
-            gltf.scene.position.x = 2;
-            gltf.scene.scale.set(0.1, 0.1, 0.1);
-            scene.add(gltf.scene);
-        });
         const movingObjects = [];
 
         // Helper to spawn a new onion at a random x position
