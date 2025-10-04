@@ -80,7 +80,26 @@
                 movingObjects.push(onion);
             });
         }
+        // Create a timer display
+        const timerDiv = document.createElement('div');
+        timerDiv.style.position = 'absolute';
+        timerDiv.style.top = '20px';
+        timerDiv.style.left = '20px';
+        timerDiv.style.color = 'white';
+        timerDiv.style.fontSize = '2em';
+        timerDiv.style.fontFamily = 'Arial, sans-serif';
+        timerDiv.style.textShadow = '1px 1px 4px #000';
+        timerDiv.textContent = 'Time: 0.0s';
+        document.body.appendChild(timerDiv);
 
+        let startTime = Date.now();
+
+        function updateTimer() {
+            const elapsed = (Date.now() - startTime) / 1000;
+            timerDiv.textContent = `Time: ${elapsed.toFixed(1)}s`;
+            requestAnimationFrame(updateTimer);
+        }
+        updateTimer();
         // Initial onions
         for (let i = 0; i < 3; i++) {
             spawnOnion();
@@ -88,7 +107,18 @@
 
         // Move objects backward and respawn when out of view
         // (Removed duplicate animate function to avoid overwriting the main animate loop)
-
+        // Camera follows the character
+        function updateCamera() {
+            if (characterRef) {
+            // Smooth follow (lerp) for a nicer effect
+            const targetZ = characterRef.position.z + 5;
+            const targetX = characterRef.position.x;
+            camera.position.x += (targetX - camera.position.x) * 0.1;
+            camera.position.z += (targetZ - camera.position.z) * 0.1;
+            camera.position.y = 3; // Keep constant height
+            camera.lookAt(characterRef.position.x, characterRef.position.y + 1, characterRef.position.z);
+            }
+        }
         let roadRef = null;
         const roadLength = 40; // Adjust based on your road model's length in Z
 
